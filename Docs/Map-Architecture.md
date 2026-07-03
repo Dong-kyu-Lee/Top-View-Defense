@@ -44,7 +44,11 @@ Assets/Scripts/Map/
 ├── TileType.cs        # TileType / Direction enum + 확장 헬퍼
 ├── GridRotation.cs    # 90° 배수 좌표·방향 회전 (순수 유틸)
 ├── RotationEvent.cs   # 회전 이벤트 1건의 직렬화 데이터
-└── StageData.cs       # 스테이지 맵 + 회전 이벤트 목록 (ScriptableObject)
+├── StageData.cs       # 스테이지 맵 + 회전 이벤트 목록 (ScriptableObject)
+├── GridState.cs       # 런타임 논리 그리드 (단일 진실 공급원)
+├── MapBuilder.cs      # StageData → 씬 타일 생성 + GridState 구축 (MonoBehaviour)
+└── Editor/
+    └── StageDataEditor.cs  # 인스펙터 그리드 페인터 (에디터 전용)
 ```
 
 ---
@@ -104,7 +108,30 @@ Assets/Scripts/Map/
 
 파생: `IsClockwise`(경고 UI 방향), `IsEffective`(0°가 아닌 실제 회전인지).
 
-### 4.5 `StageData` (ScriptableObject)
+### 4.5 `GridState` (런타임 클래스)
+
+MapBuilder가 생성하는 **런타임 논리 그리드**. 회전·경로탐색·터렛 배치가 모두 이것만 참조한다(단일 진실 공급원).
+
+| 멤버 | 설명 |
+|---|---|
+| `Width`, `Height`, `CellSize` | 그리드 크기와 셀 간격 |
+| `OriginWorld` | 셀 (0,0) 중심의 월드 좌표(바닥) |
+| `GetTile / SetTile` | 현재 지형 상태(회전으로 변함) |
+| `GetObject / SetObject` | 셀 ↔ 씬 오브젝트 매핑(회전 reparent·파괴에 사용) |
+| `GridToWorld / WorldToGrid` | 좌표 변환(전 시스템 공유) |
+| `IsWalkable/IsBuildable/IsDestructible` | 셀 질의 |
+| `BaseCell`, `FindCells(type)` | 기지/스폰 등 탐색 |
+
+### 4.6 `MapBuilder` (MonoBehaviour)
+
+`Start()`에서 `Build()` 실행. StageData → 타일 오브젝트 생성 + GridState 구축.
+
+- 타일 프리팹은 `Resources/Prefabs/Tiles/{TileType}` 에서 로드(파일명=enum명). 없으면 Cube 폴백.
+- 프리팹의 **baked 스케일 유지**, 인스턴스 `localScale.y`를 읽어 **바닥을 지면에 정렬**(솟은 땅이 위로 돌출).
+- `centerOnTransform`이면 맵 중심을 트랜스폼 위치에 맞춤.
+- 회전은 다루지 않음(평평한 계층). 재빌드용 `ClearTiles()` 제공.
+
+### 4.7 `StageData` (ScriptableObject)
 
 `Create → TopViewDefense → Stage Data` 로 스테이지당 1개 생성.
 
@@ -151,8 +178,9 @@ GridState (런타임 논리 그리드) ◀── 경로탐색이 참조
 
 ## 6. TODO / 다음 단계
 
-- [ ] `StageData` 커스텀 에디터(그리드 페인터): 인스펙터에서 타일 클릭 편집 + 회전 구역 시각화
-- [ ] `MapBuilder`: StageData → 씬 타일/기지 오브젝트 생성
+- [x] `StageData` 커스텀 에디터(그리드 페인터): 인스펙터에서 타일 클릭 편집 + 회전 구역 시각화
+- [x] `GridState`: 런타임 논리 그리드(좌표 변환·셀 매핑)
+- [x] `MapBuilder`: StageData → 씬 타일/기지 오브젝트 생성
 - [ ] `Pathfinder`: 그리드 A\* + 폐쇄회로(장애물 파괴 통과) 룰
 - [ ] `RotationScheduler`: 시간 기반 회전 발동 + 경고 UI + 터렛 동반 회전
 - [ ] 비행 적: 그리드 무시 직선 이동 분기
