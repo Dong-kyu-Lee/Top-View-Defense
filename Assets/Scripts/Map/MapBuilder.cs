@@ -34,7 +34,13 @@ namespace TopViewDefense.Map
 
         /// <summary>런타임 논리 그리드. 다른 시스템은 이것을 참조한다.</summary>
         public GridState Grid { get; private set; }
+
+        /// <summary>흐름장 경로탐색. 회전/장애물 파괴 후 Recompute()로 갱신한다.</summary>
+        public Pathfinder Pathfinder { get; private set; }
         public StageData Stage => stageData;
+
+        /// <summary>생성된 타일 오브젝트들의 부모. 회전 시 reparent 기준으로 사용.</summary>
+        public Transform TileRoot => _tileRoot;
 
         private Transform _tileRoot;
         private readonly Dictionary<TileType, GameObject> _prefabCache = new Dictionary<TileType, GameObject>();
@@ -79,6 +85,9 @@ namespace TopViewDefense.Map
                     SpawnTile(type, x, y);
                 }
             }
+
+            // 타일이 모두 채워진 뒤 흐름장 초기 계산.
+            Pathfinder = new Pathfinder(Grid);
 
             Debug.Log($"[MapBuilder] Stage {stageData.stageNumber} 빌드 완료 ({w}x{h}, cell {cellSize}).", this);
         }

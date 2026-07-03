@@ -39,7 +39,7 @@ namespace TopViewDefense.Map
         /// <summary>해당 타일에 터렛을 설치할 수 있는지.</summary>
         public static bool IsBuildable(this TileType type) => type == TileType.Buildable;
 
-        /// <summary>적이 평상시(비행 아님) 통과 가능한지. 장애물/솟은 땅은 막는다.</summary>
+        /// <summary>적이 통과 가능한지. 장애물/솟은 땅은 막는다.</summary>
         public static bool IsWalkable(this TileType type)
             => type == TileType.Ground || type == TileType.Spawn || type == TileType.Base;
 

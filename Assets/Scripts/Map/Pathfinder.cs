@@ -17,7 +17,6 @@ namespace TopViewDefense.Map
     ///
     /// GridState만 의존하는 순수 로직. 좌표는 전부 그리드 좌표(Vector2Int).
     /// 회전/장애물 파괴 등으로 지형이 바뀌면 호출자가 <see cref="Recompute"/>를 다시 호출한다.
-    /// (비행 적은 이 경로탐색을 쓰지 않고 기지로 직선 이동한다 — 별도 분기.)
     /// </summary>
     public class Pathfinder
     {
