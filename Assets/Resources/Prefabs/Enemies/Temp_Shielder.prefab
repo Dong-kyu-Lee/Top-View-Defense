@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1508115878646732078}
   - component: {fileID: 8375767165486262832}
   m_Layer: 0
-  m_Name: Shielder
+  m_Name: Temp_Shielder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

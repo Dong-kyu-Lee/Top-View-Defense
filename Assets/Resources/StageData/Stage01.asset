@@ -19,7 +19,7 @@ MonoBehaviour:
   rotationEvents:
   - origin: {x: 1, y: 1}
     size: 3
-    triggerWave: 1
+    triggerWave: 0
     quarterTurnsCW: 1
     warningWavesBefore: 1
   - origin: {x: 5, y: 6}

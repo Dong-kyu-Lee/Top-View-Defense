@@ -315,13 +315,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Enemies.EnemySpawner
   mapBuilder: {fileID: 1803838264}
   enemyManager: {fileID: 332937816}
-  enemyTypes: []
+  waves: {fileID: 0}
   fallbackPrefab: {fileID: 0}
-  spawnInterval: 2
-  startDelay: 1
-  spawnAtAllCells: 0
-  maxAlive: 0
-  totalToSpawn: 0
   spawnYOffset: 1
   autoBegin: 1
 --- !u!1 &410087039
@@ -609,6 +604,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Map.RotationScheduler
   mapBuilder: {fileID: 1803838264}
+  waveRunner: {fileID: 0}
   rotationDuration: 1
   easeInOut: 1
   autoBegin: 1

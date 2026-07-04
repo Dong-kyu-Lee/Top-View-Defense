@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Enemies.EnemyData
   type: 3
   displayName: "\uACF5\uBCD1"
-  prefab: {fileID: 3507080405329199929, guid: e32ea4333cc744f4c9e03ed97dd672c4, type: 3}
+  prefab: {fileID: 5726219807846465823, guid: e89cdc804089a8942878ed7d367c7e8d, type: 3}
   maxHp: 120
   moveSpeed: 1.6
   armor: 2
