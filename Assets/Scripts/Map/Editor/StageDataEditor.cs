@@ -149,7 +149,7 @@ namespace TopViewDefense.Map.EditorTools
                 string arrow = ev.IsClockwise ? "↻" : "↺";
                 int deg = Mathf.Abs(ev.quarterTurnsCW % 4) * 90;
                 DrawCellLabel(new Rect(zoneRect.x, zoneRect.y, zoneRect.width, 16f),
-                    $"#{i} {arrow}{deg}° @{ev.triggerTime:0}s", line);
+                    $"#{i} {arrow}{deg}° @W{ev.triggerWave}", line);
             }
         }
 

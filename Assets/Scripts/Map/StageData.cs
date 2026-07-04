@@ -32,6 +32,10 @@ namespace TopViewDefense.Map
         [Header("회전 이벤트 (스테이지당 보통 2개, 미리 설계)")]
         public List<RotationEvent> rotationEvents = new List<RotationEvent>();
 
+        [Header("웨이브 편성")]
+        [Tooltip("이 스테이지의 웨이브 데이터(WaveData 에셋). 회전 이벤트의 triggerWave가 이 웨이브 인덱스를 가리킨다.")]
+        public Enemies.WaveData waves;
+
         /// <summary>기지의 그리드 좌표(정중앙). Base 타일을 탐색해 반환, 없으면 중앙 계산값.</summary>
         public Vector2Int BaseCell
         {

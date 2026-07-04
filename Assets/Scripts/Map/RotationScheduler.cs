@@ -6,12 +6,12 @@ using UnityEngine;
 namespace TopViewDefense.Map
 {
     /// <summary>
-    /// 스테이지에 미리 설계된 회전 이벤트(<see cref="RotationEvent"/>)를 시간에 맞춰 발동한다.
+    /// 스테이지에 미리 설계된 회전 이벤트(<see cref="RotationEvent"/>)를 웨이브 진행에 맞춰 발동한다.
     /// (CLAUDE.md 3장 - "특정 웨이브 도달 시 일부 칸이 90° 배수로 총 2회 회전", 랜덤 아님)
     ///
-    /// 처리 흐름(문서 5장 런타임 계층):
-    ///   triggerTime - warningLeadTime : 경고(OnRotationWarning) → 경고 UI가 화살표 표시
-    ///   triggerTime                   : 회전 시작(OnRotationStarted)
+    /// <see cref="Enemies.WaveRunner.OnWaveStarted"/>(웨이브 인덱스)를 구독해 트리거한다:
+    ///   웨이브 == RotationEvent.WarningWave  : 경고(OnRotationWarning) → 경고 UI가 화살표 표시
+    ///   웨이브 == RotationEvent.triggerWave   : 회전 시작(OnRotationStarted)
     ///     ├─ Pivot Transform 회전(연출)      : 구역 타일을 임시 피벗 아래로 모아 90° 배수 회전
     ///     ├─ GridState 데이터 동기화          : GridRotation으로 _tiles/_objects 블록 내 순열 재배치
     ///     └─ 완료 후 Pathfinder.Recompute()   : 회전으로 바뀐 지형에 맞춰 흐름장 재계산(OnRotationCompleted)
@@ -28,6 +28,9 @@ namespace TopViewDefense.Map
         [Tooltip("맵/그리드/경로탐색 소유자. 비우면 같은 오브젝트 또는 씬에서 탐색.")]
         [SerializeField] private MapBuilder mapBuilder;
 
+        [Tooltip("웨이브 진행원. 비우면 씬에서 탐색. 이 컴포넌트의 OnWaveStarted에 맞춰 회전이 발동한다.")]
+        [SerializeField] private Enemies.WaveRunner waveRunner;
+
         [Header("연출")]
         [Tooltip("회전 1회 연출에 걸리는 시간(초). 데이터/경로 갱신은 연출 종료 후 반영.")]
         [Min(0f)] [SerializeField] private float rotationDuration = 1f;
@@ -38,7 +41,7 @@ namespace TopViewDefense.Map
         [Tooltip("체크 시 Start에서 자동으로 스케줄을 시작.")]
         [SerializeField] private bool autoBegin = true;
 
-        /// <summary>회전 예정 경고(회전 warningLeadTime 초 전). 경고 UI가 구독한다.</summary>
+        /// <summary>회전 예정 경고(회전 warningWavesBefore 웨이브 전). 경고 UI가 구독한다.</summary>
         public event Action<RotationEvent> OnRotationWarning;
 
         /// <summary>회전 연출 시작 시점.</summary>
@@ -52,7 +55,13 @@ namespace TopViewDefense.Map
 
         private GridState Grid => mapBuilder != null ? mapBuilder.Grid : null;
 
-        private Coroutine _schedule;
+        // 웨이브 시작에 맞춰 발동할 회전 이벤트들(triggerWave 오름차순, 그리드 유효한 것만).
+        private readonly List<RotationEvent> _events = new List<RotationEvent>();
+        // triggerWave가 같은 이벤트가 겹쳐도 연출이 뒤섞이지 않도록 순차 처리하는 큐.
+        private readonly Queue<RotationEvent> _pending = new Queue<RotationEvent>();
+        private Coroutine _begin;
+        private Coroutine _drain;
+        private bool _subscribed;
 
         private void Reset()
         {
@@ -64,10 +73,15 @@ namespace TopViewDefense.Map
             if (autoBegin) Begin();
         }
 
-        /// <summary>스케줄을 시작한다(중복 호출 무시). Grid가 준비될 때까지 대기 후 진행.</summary>
+        private void OnDestroy()
+        {
+            Unsubscribe();
+        }
+
+        /// <summary>스케줄을 시작한다(중복 호출 무시). Grid/WaveRunner가 준비될 때까지 대기 후 구독.</summary>
         public void Begin()
         {
-            if (_schedule != null) return;
+            if (_subscribed || _begin != null) return;
 
             if (mapBuilder == null)
                 mapBuilder = GetComponent<MapBuilder>() ?? FindObjectOfType<MapBuilder>();
@@ -78,71 +92,113 @@ namespace TopViewDefense.Map
                 return;
             }
 
-            _schedule = StartCoroutine(RunSchedule());
+            _begin = StartCoroutine(BeginRoutine());
         }
 
         /// <summary>진행 중인 스케줄을 중단한다(연출 중이면 즉시 멈춤).</summary>
         public void StopSchedule()
         {
-            if (_schedule != null)
-            {
-                StopCoroutine(_schedule);
-                _schedule = null;
-            }
+            if (_begin != null) { StopCoroutine(_begin); _begin = null; }
+            if (_drain != null) { StopCoroutine(_drain); _drain = null; }
+            _pending.Clear();
+            Unsubscribe();
             IsRotating = false;
         }
 
-        // ------------------------------------------------------------ 스케줄 루프
+        // ------------------------------------------------------------ 구독 설정
 
-        private IEnumerator RunSchedule()
+        private IEnumerator BeginRoutine()
         {
             // MapBuilder.Build()(Start에서 실행)로 Grid가 채워질 때까지 대기 — 실행 순서 의존 제거.
             while (Grid == null)
                 yield return null;
 
+            if (waveRunner == null)
+                waveRunner = FindObjectOfType<Enemies.WaveRunner>();
+
+            // 그리드를 벗어나지 않는 이벤트만 triggerWave 오름차순으로 준비.
+            _events.Clear();
             StageData stage = mapBuilder.Stage;
-            if (stage == null || stage.rotationEvents == null || stage.rotationEvents.Count == 0)
+            if (stage != null && stage.rotationEvents != null)
+            {
+                foreach (RotationEvent ev in stage.rotationEvents)
+                {
+                    if (ev == null) continue;
+                    if (!IsBlockValid(ev))
+                    {
+                        Debug.LogWarning($"[RotationScheduler] 회전 구역이 그리드를 벗어나 건너뜁니다. " +
+                                         $"origin={ev.origin}, size={ev.size}", this);
+                        continue;
+                    }
+                    _events.Add(ev);
+                }
+                _events.Sort((a, b) => a.triggerWave.CompareTo(b.triggerWave));
+            }
+
+            _begin = null;
+
+            if (_events.Count == 0)
                 yield break;
 
-            // triggerTime 오름차순으로 순차 처리(설계상 이벤트는 시간상 겹치지 않게 배치).
-            var events = new List<RotationEvent>(stage.rotationEvents);
-            events.Sort((a, b) => a.triggerTime.CompareTo(b.triggerTime));
-
-            float startTime = Time.time; // "스테이지 시작" 기준 시각
-
-            foreach (RotationEvent ev in events)
+            if (waveRunner == null)
             {
-                if (ev == null) continue;
+                Debug.LogWarning("[RotationScheduler] WaveRunner를 찾지 못해 회전이 발동하지 않습니다.", this);
+                yield break;
+            }
 
-                if (!IsBlockValid(ev))
+            waveRunner.OnWaveStarted += HandleWaveStarted;
+            _subscribed = true;
+
+            // 첫 웨이브(인덱스 0)보다 앞선 경고(WarningWave < 0)는 스테이지 시작 즉시 발신.
+            foreach (RotationEvent ev in _events)
+                if (ev.WarningWave < 0)
+                    OnRotationWarning?.Invoke(ev);
+        }
+
+        private void Unsubscribe()
+        {
+            if (_subscribed && waveRunner != null)
+                waveRunner.OnWaveStarted -= HandleWaveStarted;
+            _subscribed = false;
+        }
+
+        // ------------------------------------------------------------ 웨이브 → 회전 발동
+
+        // 웨이브 W가 시작될 때: W == WarningWave면 경고, W == triggerWave면 회전 큐에 넣어 순차 발동.
+        private void HandleWaveStarted(int waveIndex)
+        {
+            foreach (RotationEvent ev in _events)
+                if (ev.WarningWave == waveIndex)
+                    OnRotationWarning?.Invoke(ev);
+
+            bool queued = false;
+            foreach (RotationEvent ev in _events)
+            {
+                if (ev.triggerWave == waveIndex)
                 {
-                    Debug.LogWarning($"[RotationScheduler] 회전 구역이 그리드를 벗어나 건너뜁니다. " +
-                                     $"origin={ev.origin}, size={ev.size}", this);
-                    continue;
+                    _pending.Enqueue(ev);
+                    queued = true;
                 }
+            }
 
-                // 1) 경고 시점까지 대기 후 경고 발신.
-                float warnTime = Mathf.Max(0f, ev.triggerTime - Mathf.Max(0f, ev.warningLeadTime));
-                yield return WaitUntilElapsed(startTime, warnTime);
-                OnRotationWarning?.Invoke(ev);
+            if (queued && _drain == null)
+                _drain = StartCoroutine(DrainRoutine());
+        }
 
-                // 2) 발동 시점까지 대기.
-                yield return WaitUntilElapsed(startTime, ev.triggerTime);
+        // 큐에 쌓인 회전을 하나씩 순차 연출(겹침 방지).
+        private IEnumerator DrainRoutine()
+        {
+            while (_pending.Count > 0)
+            {
+                RotationEvent ev = _pending.Dequeue();
 
-                // 3) 회전(0°가 아닌 실제 회전만 연출/데이터 갱신).
+                // 실제 지형을 바꾸는(0°가 아닌) 회전만 연출/데이터 갱신, 항등 회전은 완료 통지만.
                 if (ev.IsEffective)
                     yield return RotateRoutine(ev);
                 else
-                    OnRotationCompleted?.Invoke(ev); // 항등 회전이라도 완료 통지는 한다.
+                    OnRotationCompleted?.Invoke(ev);
             }
-
-            _schedule = null;
-        }
-
-        private static IEnumerator WaitUntilElapsed(float startTime, float target)
-        {
-            while (Time.time - startTime < target)
-                yield return null;
+            _drain = null;
         }
 
         // ------------------------------------------------------------ 회전 연출 + 데이터 갱신

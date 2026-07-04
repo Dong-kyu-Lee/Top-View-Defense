@@ -16,14 +16,17 @@ namespace TopViewDefense.Map
         [Tooltip("구역 한 변의 칸 수. 3x3 또는 4x4 단위.")]
         public int size = 3;
 
-        [Tooltip("스테이지 시작 후 이 이벤트가 발동하기까지의 시간(초).")]
-        public float triggerTime = 10f;
+        [Tooltip("이 회전이 발동하는 웨이브 인덱스(0=첫 웨이브). 해당 웨이브가 '시작'될 때 회전한다.")]
+        public int triggerWave = 1;
 
         [Tooltip("시계방향 90° 스텝 수. 1=90°, 2=180°, 3=270°, 음수=반시계.")]
         public int quarterTurnsCW = 1;
 
-        [Tooltip("회전 시작 몇 초 전에 경고 화살표 UI를 띄울지.")]
-        public float warningLeadTime = 5f;
+        [Tooltip("회전 몇 웨이브 전에 경고 화살표 UI를 띄울지(보통 1 = 1웨이브 전). 0이면 회전 웨이브 시작과 동시.")]
+        [Min(0)] public int warningWavesBefore = 1;
+
+        /// <summary>경고를 발신할 웨이브 인덱스(0 미만이면 스테이지 시작 즉시 경고 대상).</summary>
+        public int WarningWave => triggerWave - Mathf.Max(0, warningWavesBefore);
 
         /// <summary>경고 UI 표기용: 시계방향 여부(양수 = 시계, 음수 = 반시계).</summary>
         public bool IsClockwise => quarterTurnsCW > 0;

@@ -2,6 +2,7 @@
 
 > 회전하는 바둑판 맵 시스템의 데이터/유틸 계층 설계 문서.
 > 기획 원문은 프로젝트 루트 [`CLAUDE.md`](../CLAUDE.md) 3장(맵 및 회전 메커니즘) 참고.
+> 이 위에 얹히는 적/전투 계층(스폰·이동·기지 판정)은 [`Enemy-Architecture.md`](./Enemy-Architecture.md) 참고.
 
 ---
 

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad957a867e58f64fab6ed27f2298261, type: 3}
+  m_Name: Shielder
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Enemies.EnemyData
+  type: 3
+  displayName: "\uACF5\uBCD1"
+  prefab: {fileID: 3507080405329199929, guid: e32ea4333cc744f4c9e03ed97dd672c4, type: 3}
+  maxHp: 120
+  moveSpeed: 1.6
+  armor: 2
+  hasResistance: 1
+  resistantType: 1
+  resistanceMultiplier: 0.5
+  damageToBase: 1
+  energyDrop: 10
+  goldDrop: 2
