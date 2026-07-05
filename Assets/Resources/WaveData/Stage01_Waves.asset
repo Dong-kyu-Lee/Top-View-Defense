@@ -34,37 +34,6 @@ MonoBehaviour:
       count: 2
       interval: 0.5
       startDelay: 2
-  - label: "Wave 2 - \uC7A5\uAC11\uBCD1 \uB4F1\uC7A5"
-    restBefore: 30
-    groups:
-    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
-      corner: 0
-      count: 2
-      interval: 1.5
-      startDelay: 0
-    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
-      corner: 1
-      count: 4
-      interval: 0.5
-      startDelay: 1
-  - label: "Wave 3 - \uC815\uCC30\uBCD1 \uB7EC\uC2DC"
-    restBefore: 30
-    groups:
-    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
-      corner: 2
-      count: 4
-      interval: 0.35
-      startDelay: 0
-    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
-      corner: 1
-      count: 4
-      interval: 0.35
-      startDelay: 1.5
-    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
-      corner: 0
-      count: 3
-      interval: 0.6
-      startDelay: 0.5
   - label: "Wave 4 - \uACF5\uBCD1 \uD638\uC704 (\uD53C\uB0A0\uB808)"
     restBefore: 30
     groups:

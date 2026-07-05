@@ -18,7 +18,9 @@ namespace TopViewDefense.Turrets
     ///
     /// 발사는 히트스캔(명중 즉시 <see cref="IDamageable.TakeDamage"/>). 종류별 페이로드는 데이터로 가른다:
     /// 단일 타격(기본/더블=shotsPerFire), 광역 피해·감속·도트(프리즈/파이어=areaRadius·slowMultiplier·
-    /// dotPerSecond), 공격 없이 에너지 생산(에너지=energyPerCycle). 투사체 연출은 이후 페이즈에서 확장한다.
+    /// dotPerSecond), 공격 없이 에너지 생산(에너지=energyPerCycle). 발사 연출(총구/탄체/임팩트)은
+    /// 데미지와 분리된 순수 표시 계층으로, <see cref="TurretData"/>의 VFX 프리팹을 <see cref="VfxPool"/>로
+    /// 풀링해 재생한다(탄체 <see cref="TurretProjectile"/>는 이미 확정된 피격을 그리기만 한다).
     /// </summary>
     [DisallowMultipleComponent]
     public class Turret : MonoBehaviour
@@ -132,13 +134,24 @@ namespace TopViewDefense.Turrets
         }
 
         // 히트스캔 발사. 광역 터렛(프리즈/파이어)은 최근접 적 '위치'에 AoE를 터뜨리고(CLAUDE.md 5장),
-        // 단일 터렛(기본/더블)은 타겟에게 shotsPerFire만큼 즉시 타격한다.
+        // 단일 터렛(기본/더블)은 타겟에게 shotsPerFire만큼 즉시 타격한다. 연출은 데미지 뒤에 별도로 얹는다.
         private void Fire()
         {
+            // VFX 파라미터는 데미지 적용 전에 스냅샷한다(피격으로 타겟이 파괴돼도 목적지/방향이 남도록).
+            Enemy tgt = _target;
+            Transform targetTf = tgt != null ? tgt.transform : null;
+            Vector3 destination = tgt != null ? tgt.Position : Position + transform.forward * _worldRange;
+
             if (Data.areaRadius > 0f)
-                FireArea(_target.Position);
+            {
+                FireArea(destination);
+                SpawnFireVfx(destination, targetTf, 1);                             // 광역: 한 발이 중심으로 날아가 폭발.
+            }
             else
+            {
                 FireSingle();
+                SpawnFireVfx(destination, targetTf, Mathf.Max(1, Data.shotsPerFire)); // 단일: 타격 수만큼 탄체.
+            }
         }
 
         // 단일 타겟: shotsPerFire만큼 즉시 타격(더블 터렛 등은 데이터만으로 표현).
@@ -171,6 +184,46 @@ namespace TopViewDefense.Turrets
                 if (Data.slowMultiplier < 1f) e.ApplySlow(Data.slowMultiplier, Data.effectDuration);
                 if (Data.dotPerSecond > 0f) e.ApplyDoT(Data.dotPerSecond, Data.effectDuration, Data.damageType);
             }
+        }
+
+        // ---------------------------------------------------------------- 연출(VFX)
+        // 데미지와 분리된 순수 표시 계층. 여기서는 어떤 피격도 주지 않는다(이미 Fire에서 확정).
+
+        // 총구 월드 지점(터렛 포즈 + 데이터의 로컬 오프셋). 조준으로 이미 타겟을 향하므로 forward가 발사 방향.
+        private Vector3 MuzzlePoint() => transform.position + transform.rotation * Data.muzzleLocalOffset;
+
+        // 발사 연출: 총구 플래시 + 탄체(있으면), 탄체가 없으면 목적지에 즉시 임팩트(순수 히트스캔 표현).
+        private void SpawnFireVfx(Vector3 destination, Transform targetTf, int count)
+        {
+            Vector3 muzzle = MuzzlePoint();
+
+            if (Data.muzzlePrefab != null)
+                VfxPool.PlayOneShot(Data.muzzlePrefab, muzzle, transform.rotation);
+
+            if (Data.projectilePrefab == null)
+            {
+                if (Data.impactPrefab != null)
+                    VfxPool.PlayOneShot(Data.impactPrefab, destination, transform.rotation);
+                return;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 start = muzzle + BarrelOffset(i, count);
+                GameObject go = VfxPool.Get(Data.projectilePrefab, start, transform.rotation);
+                TurretProjectile shot = go.GetComponent<TurretProjectile>();
+                if (shot == null) shot = go.AddComponent<TurretProjectile>();
+                shot.Launch(start, targetTf, destination, Data.projectileSpeed, Data.impactPrefab);
+            }
+        }
+
+        // 다연장(더블 등) 시 탄체를 좌우로 살짝 벌려 여러 발이 보이게 한다(순수 연출).
+        private Vector3 BarrelOffset(int index, int count)
+        {
+            if (count <= 1) return Vector3.zero;
+            const float spacing = 0.15f;
+            float t = index - (count - 1) * 0.5f;
+            return transform.right * (t * spacing);
         }
     }
 }

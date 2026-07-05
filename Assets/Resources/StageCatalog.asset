@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Progression.StageCatalog
   stages:
   - {fileID: 11400000, guid: a1df4f231b8890044aee31c53d57398d, type: 2}
-  - {fileID: 11400000, guid: 8c6a4e4997d7dee4f9d1d002ef7da2e4, type: 2}
-  - {fileID: 11400000, guid: 7808eb00f951d754185745b7b4aeee06, type: 2}
+  - {fileID: 11400000, guid: a2b1c3d4e5f60718293a4b5c6d7e8f90, type: 2}
+  - {fileID: 11400000, guid: b3c2d4e5f6071829304a5b6c7d8e9f01, type: 2}
+  - {fileID: 11400000, guid: c4d3e5f60718293a4b5c6d7e8f90a1b2, type: 2}
+  - {fileID: 11400000, guid: d5e4f60718293a4b5c6d7e8f90a1b2c3, type: 2}
   goldReward: 1e0000003c00000064000000

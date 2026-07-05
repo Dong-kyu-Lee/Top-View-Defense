@@ -19,17 +19,12 @@ MonoBehaviour:
   rotationEvents:
   - origin: {x: 1, y: 1}
     size: 3
-    triggerWave: 0
+    triggerWave: 1
     quarterTurnsCW: 1
     warningWavesBefore: 1
-  - origin: {x: 5, y: 6}
+  - origin: {x: 4, y: 4}
     size: 4
-    triggerWave: 1
-    quarterTurnsCW: 3
+    triggerWave: 3
+    quarterTurnsCW: 2
     warningWavesBefore: 1
-  - origin: {x: 6, y: 2}
-    size: 3
-    triggerWave: 1
-    quarterTurnsCW: 3
-    warningWavesBefore: 1
-  waves: {fileID: 11400000, guid: cf1e39365f723d24b9c8f779f7b5a3fa, type: 2}
+  waves: {fileID: 11400000, guid: e6f5071829304a5b6c7d8e9f01a2b3c4, type: 2}

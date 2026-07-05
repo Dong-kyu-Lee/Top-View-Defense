@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 0
   displayName: Basic Turret
   prefab: {fileID: 8046614622845039887, guid: 26ef619677eaa34449798d8e5b074598, type: 3}
+  icon: {fileID: 21300000, guid: eb30d650760017a42a1ddf4bee2c8e5f, type: 3}
   cost: 50
   maxCount: 0
   range: 5
@@ -27,3 +28,8 @@ MonoBehaviour:
   effectDuration: 0
   dotPerSecond: 0
   energyPerCycle: 0
+  muzzlePrefab: {fileID: 8443315704496310910, guid: 6ef35fa36e3a65043b2d800600204bdd, type: 3}
+  projectilePrefab: {fileID: 8065889090747378081, guid: b30bd443e70367a428d757f3d43af616, type: 3}
+  impactPrefab: {fileID: 7226583673155636401, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  projectileSpeed: 12
+  muzzleLocalOffset: {x: 0, y: 0.5, z: 0.4}

@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 4
   displayName: Fire Turret
   prefab: {fileID: 2554948455700665728, guid: 5d940fdafc3fa9c4d8c679f051606652, type: 3}
+  icon: {fileID: 21300000, guid: f37b8b34e69176a478b989c1d3915dae, type: 3}
   cost: 100
   maxCount: 0
   range: 5
@@ -27,3 +28,8 @@ MonoBehaviour:
   effectDuration: 5
   dotPerSecond: 5
   energyPerCycle: 0
+  muzzlePrefab: {fileID: 8443315704496310910, guid: 6ef35fa36e3a65043b2d800600204bdd, type: 3}
+  projectilePrefab: {fileID: 2766680047848175022, guid: bc66bc162ce3a0a4e8e020d135a1c149, type: 3}
+  impactPrefab: {fileID: 7226583673155636401, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  projectileSpeed: 12
+  muzzleLocalOffset: {x: 0, y: 0.5, z: 0.4}

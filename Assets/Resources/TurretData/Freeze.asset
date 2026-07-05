@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 2
   displayName: Freeze Turret
   prefab: {fileID: 4626566949818560072, guid: 429a607a2fe68744f9c85b6fdfa91c24, type: 3}
+  icon: {fileID: 21300000, guid: 98e1a8aa603c3774283ae2a981581e7a, type: 3}
   cost: 100
   maxCount: 0
   range: 6
@@ -27,3 +28,8 @@ MonoBehaviour:
   effectDuration: 3
   dotPerSecond: 0
   energyPerCycle: 0
+  muzzlePrefab: {fileID: 8443315704496310910, guid: 6ef35fa36e3a65043b2d800600204bdd, type: 3}
+  projectilePrefab: {fileID: 906829737390200350, guid: e3f8d337c69c85444bef567a97400082, type: 3}
+  impactPrefab: {fileID: 7226583673155636401, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  projectileSpeed: 12
+  muzzleLocalOffset: {x: 0, y: 0.5, z: 0.4}

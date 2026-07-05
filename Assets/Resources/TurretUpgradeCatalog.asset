@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3d7380e0874264aa0d690224ed47df, type: 3}
+  m_Name: TurretUpgradeCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Turrets.TurretUpgradeCatalog
+  turrets:
+  - {fileID: 11400000, guid: 7081a2b3c4d5e6f70812a3b4c5d6e7f8, type: 2}
+  - {fileID: 11400000, guid: bbafd55ac3afc2d4db3194c266b363f9, type: 2}
+  - {fileID: 11400000, guid: c14e2b6b8418b864ab2a33d25320b13f, type: 2}
+  - {fileID: 11400000, guid: 9362503df0770054997397c8ccdc0e6e, type: 2}
+  - {fileID: 11400000, guid: b68fc352bfb65624a9c03df1ea24a33f, type: 2}
+  damagePerLevel: 0.25
+  speedPerLevel: 0.15
+  costPerLevel: 64000000b40000002c010000

@@ -208,5 +208,6 @@ Resources에서 로드한다. 여기에 **`StageSession.SelectedStage` 우선** 
 **범위 밖(후속):**
 - 타이틀 **[상점]**(골드로 터렛 영구 강화, CLAUDE.md 7장 ①)은 `PlayerProgress.Gold`/`TrySpendGold`를
   공유하는 별도 메타 화면이다. 이 문서는 그 저장소만 세워 두고 상점 UI는 다루지 않는다.
+  → 구현됨: [`Shop-Architecture.md`](./Shop-Architecture.md)(강화 레벨 저장·상점 UI·전투 반영).
 - 스테이지 확장(현재 `Stage01`만 존재 → 총 5개)은 `StageData`/`WaveData` 에셋 추가로 해결되며,
   `StageCatalog.stages`에 등록만 하면 그리드·해금이 자동 반영된다(코드 변경 불필요).

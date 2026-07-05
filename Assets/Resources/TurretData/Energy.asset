@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 3
   displayName: Energy Turret
   prefab: {fileID: 6982455039042982287, guid: 1dabc7499cba93a44a1c2b8fd04f7f9e, type: 3}
+  icon: {fileID: 21300000, guid: 78d61d008c4164349a76449d5918a00a, type: 3}
   cost: 50
   maxCount: 3
   range: 5
@@ -27,3 +28,8 @@ MonoBehaviour:
   effectDuration: 0
   dotPerSecond: 0
   energyPerCycle: 25
+  muzzlePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 0}
+  impactPrefab: {fileID: 0}
+  projectileSpeed: 12
+  muzzleLocalOffset: {x: 0, y: 0.5, z: 0.4}

@@ -65,5 +65,21 @@ namespace TopViewDefense.Turrets
 
         [Tooltip("에너지 터렛: 생산 주기(fireInterval)당 생산하는 에너지량(공격 대신).")]
         [Min(0)] public int energyPerCycle = 0;
+
+        [Header("연출 (VFX, 선택 — 순수 표시용. 데미지는 히트스캔으로 이미 확정)")]
+        [Tooltip("발사 순간 총구에 재생할 파티클 프리팹(선택).")]
+        public GameObject muzzlePrefab;
+
+        [Tooltip("총구에서 목표로 날아가는 탄체 프리팹(선택). 비우면 탄체 없이 임팩트만 재생(순수 히트스캔).")]
+        public GameObject projectilePrefab;
+
+        [Tooltip("명중/폭발 지점에 재생할 파티클 프리팹(선택). 광역 터렛은 AoE 중심에서 터진다.")]
+        public GameObject impactPrefab;
+
+        [Tooltip("탄체 이동 속도(월드 유닛/초). 빠를수록 히트스캔에 가깝게 보인다.")]
+        [Min(0f)] public float projectileSpeed = 25f;
+
+        [Tooltip("총구 위치의 터렛 로컬 오프셋(탄체/플래시 스폰 지점). 모델 포신 높이/앞쪽에 맞춘다.")]
+        public Vector3 muzzleLocalOffset = new Vector3(0f, 0.5f, 0.4f);
     }
 }

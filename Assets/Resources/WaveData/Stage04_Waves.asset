@@ -1,0 +1,149 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f678a5db82c1dc43b90d15d1aa0729e, type: 3}
+  m_Name: Stage04_Waves
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Enemies.WaveData
+  waves:
+  - label: "웨이브 1 - 돌격 개시"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 0
+      count: 7
+      interval: 0.5
+      startDelay: 0
+  - label: "웨이브 2 - 삼면 압박"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 1
+      count: 5
+      interval: 0.5
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 2
+      count: 5
+      interval: 0.5
+      startDelay: 0.8
+    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
+      corner: 3
+      count: 3
+      interval: 0.4
+      startDelay: 1.5
+  - label: "웨이브 3 - 장갑 진격 [회전]"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 0
+      count: 3
+      interval: 1.2
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 3
+      count: 6
+      interval: 0.45
+      startDelay: 1
+  - label: "웨이브 4 - 정찰 폭풍"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
+      corner: 2
+      count: 8
+      interval: 0.25
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
+      corner: 1
+      count: 7
+      interval: 0.25
+      startDelay: 1
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 0
+      count: 5
+      interval: 0.4
+      startDelay: 0.5
+  - label: "웨이브 5 - 공병 선봉"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 2d47a181fcefd6448b9828e9072dcb1b, type: 2}
+      corner: 0
+      count: 2
+      interval: 1.8
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 0
+      count: 7
+      interval: 0.4
+      startDelay: 1
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 3
+      count: 2
+      interval: 1.2
+      startDelay: 1.5
+  - label: "웨이브 6 - 총력 협공 [회전]"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 0
+      count: 3
+      interval: 1.2
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 3
+      count: 7
+      interval: 0.4
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
+      corner: 2
+      count: 6
+      interval: 0.28
+      startDelay: 1
+  - label: "웨이브 7 - 장갑 벽"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 0
+      count: 4
+      interval: 1.1
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 1
+      count: 3
+      interval: 1.1
+      startDelay: 1
+    - enemy: {fileID: 11400000, guid: 2d47a181fcefd6448b9828e9072dcb1b, type: 2}
+      corner: 2
+      count: 1
+      interval: 1
+      startDelay: 0.5
+  - label: "웨이브 8 - 최종 돌파"
+    restBefore: 30
+    groups:
+    - enemy: {fileID: 11400000, guid: 2d47a181fcefd6448b9828e9072dcb1b, type: 2}
+      corner: 0
+      count: 2
+      interval: 2
+      startDelay: 0
+    - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
+      corner: 1
+      count: 9
+      interval: 0.38
+      startDelay: 1
+    - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
+      corner: 2
+      count: 7
+      interval: 0.28
+      startDelay: 1.5
+    - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
+      corner: 3
+      count: 2
+      interval: 1.2
+      startDelay: 2
