@@ -1,17 +1,7 @@
 fileFormatVersion: 2
-guid: 1c2dca4a34ee8a140a6e52c59c97db58
-AssetOrigin:
-  serializedVersion: 1
-  productId: 298577
-  packageName: Space Game GUI kit
-  packageVersion: 1.1
-  assetPath: Assets/Space_Exploration_GUI_Kit/Containers/Large/loot-found-container-large.png
-  uploadId: 937030
+guid: f37b8b34e69176a478b989c1d3915dae
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: 7311297799603790156
-    second: loot-found-container-large_0
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,11 +39,11 @@ TextureImporter:
     mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: 1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -118,29 +108,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: loot-found-container-large_0
-      rect:
-        serializedVersion: 2
-        x: 6
-        y: 3
-        width: 221
-        height: 105
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 30, y: 25, z: 30, w: 25}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c41aa70ac92f67560800000000000000
-      internalID: 7311297799603790156
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     customData: 
     physicsShape: []
@@ -154,8 +122,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      loot-found-container-large_0: 7311297799603790156
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
