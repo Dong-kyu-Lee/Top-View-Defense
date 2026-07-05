@@ -50,6 +50,9 @@ namespace TopViewDefense.Enemies
         /// <summary>웨이브의 정비 시간(restBefore)에 진입함. 프리뷰 UI가 구독. 인자는 곧 시작할 웨이브 인덱스.</summary>
         public event Action<int> OnWavePreview;
 
+        /// <summary>한 웨이브의 적이 모두 전멸함(정비/승리 판정 직전). 배너 UI가 구독. 인자는 방금 클리어한 웨이브 인덱스.</summary>
+        public event Action<int> OnWaveCleared;
+
         /// <summary>모든 웨이브를 소진하고 마지막 웨이브 적까지 전멸함. 승리 판정이 구독.</summary>
         public event Action OnAllWavesCleared;
 
@@ -198,6 +201,9 @@ namespace TopViewDefense.Enemies
                 // 5) 클리어 기반 진행: 이 웨이브 적이 모두 사라질 때까지 대기.
                 while (enemyManager.Count > 0)
                     yield return null;
+
+                // 6) 웨이브 클리어 통지(배너 UI가 구독). 마지막 웨이브면 이어서 OnAllWavesCleared도 발행된다.
+                OnWaveCleared?.Invoke(i);
             }
 
             CurrentWave = -1;
