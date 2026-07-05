@@ -116,6 +116,11 @@ namespace TopViewDefense.Map
                 Debug.LogWarning($"[MapBuilder] '{tilePrefabFolder}/{type}' 프리팹을 찾지 못해 Cube로 대체했습니다.", this);
             }
 
+            // 배치 클릭 레이캐스트(TurretPlacer)가 타일 윗면을 맞힐 수 있도록 콜라이더 보장.
+            // 폴백 Cube는 이미 BoxCollider를 갖지만, 아트 프리팹은 없을 수 있으므로 보강한다.
+            if (go.GetComponentInChildren<Collider>() == null)
+                go.AddComponent<BoxCollider>();
+
             go.name = $"{type}_{x}_{y}";
             Grid.SetObject(x, y, go);
         }

@@ -2,7 +2,8 @@
 
 > 적 유닛의 스폰·이동·전투·기지 판정 계층 설계 문서.
 > 기획 원문은 프로젝트 루트 [`CLAUDE.md`](../CLAUDE.md) 4장(적 유닛)·2장(승패)·6·7장(제어/경제) 참고.
-> 맵/경로 계층은 [`Map-Architecture.md`](./Map-Architecture.md)에 별도 정리되어 있으며, 이 문서는 그 위에 얹힌다.
+> 맵/경로 계층은 [`Map-Architecture.md`](./Map-Architecture.md), 터렛 계층은 [`Turret-Architecture.md`](./Turret-Architecture.md)에
+> 별도 정리되어 있으며, 이 문서는 그 위에 얹힌다.
 
 ---
 
@@ -218,7 +219,7 @@ StageData → MapBuilder ─→ GridState + Pathfinder(흐름장)
         │
         ├─ OnEnemyReachedBase ─→ BaseCore : 목숨 감소 → (0) OnGameOver
         ├─ OnEnemyKilled       ─→ (경제 시스템: 보상 드랍) [미구현]
-        └─ FindNearest         ─→ (터렛 타게팅)            [미구현]
+        └─ FindNearest         ─→ Turret 타게팅 (Turret-Architecture.md §4.3)
 ```
 
 권장 구현 조합(설계 결론):
@@ -261,5 +262,6 @@ StageData → MapBuilder ─→ GridState + Pathfinder(흐름장)
 - [ ] **Phase 5 — 폐쇄회로 대응**: 길이 완전히 막히면 `Pathfinder.DestructionTargets`의 Obstacle을
       적이 공격·파괴하고 통과(CLAUDE.md 3장). 현재는 막히면 대기.
 - [ ] **경제 연동**: `OnEnemyKilled` → 에너지/골드 드랍(CLAUDE.md 7장).
-- [ ] **터렛 연동**: `FindNearest`로 타게팅하는 터렛 5종(프리팹만 존재, 로직 미구현).
+- [x] **터렛 연동(1차)**: `FindNearest`로 타게팅하는 기본 터렛 배치·조준·히트스캔 구현
+      ([`Turret-Architecture.md`](./Turret-Architecture.md)). 나머지 4종·투사체·경제 드랍은 그 문서 §6 참고.
 ```

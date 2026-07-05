@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b3c4d5e6f7081a2b3c4d5e6f70812a3, type: 3}
+  m_Name: Fire
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Turrets.TurretData
+  type: 4
+  displayName: Fire Turret
+  prefab: {fileID: 2554948455700665728, guid: 5d940fdafc3fa9c4d8c679f051606652, type: 3}
+  cost: 100
+  maxCount: 0
+  range: 5
+  fireInterval: 1
+  damage: 15
+  damageType: 1
+  shotsPerFire: 1
+  areaRadius: 1
+  slowMultiplier: 1
+  effectDuration: 5
+  dotPerSecond: 5
+  energyPerCycle: 0
