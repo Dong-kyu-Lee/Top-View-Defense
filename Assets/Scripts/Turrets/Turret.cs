@@ -39,6 +39,11 @@ namespace TopViewDefense.Turrets
         private Enemy _target;
         private bool _initialized;
 
+        // 영구 강화가 반영된 유효 수치(배치 시점 스냅샷). base 에셋(Data)은 불변으로 두고 여기서만 강화를 얹는다.
+        private float _damage;
+        private float _fireInterval;
+        private int _energyPerCycle;
+
         // 생산형(에너지): 타겟 없이 주기마다 에너지를 생산한다.
         private bool IsProducer => Data != null && Data.energyPerCycle > 0;
 
@@ -53,6 +58,12 @@ namespace TopViewDefense.Turrets
             Cell = cell;
             _cellSize = cellSize;
             _worldRange = data != null ? data.range * cellSize : 0f;
+
+            // 상점 영구 강화를 반영한 유효 수치를 배치 시점에 스냅샷한다(CLAUDE.md 7장 ①).
+            _damage = TurretUpgrades.EffectiveDamage(data);
+            _fireInterval = TurretUpgrades.EffectiveInterval(data);
+            _energyPerCycle = TurretUpgrades.EffectiveEnergyPerCycle(data);
+
             _cooldown = 0f;
             _initialized = true;
         }
@@ -80,7 +91,7 @@ namespace TopViewDefense.Turrets
             if (_cooldown <= 0f && _target != null)
             {
                 Fire();
-                _cooldown = Data.fireInterval;
+                _cooldown = _fireInterval;
             }
         }
 
@@ -89,10 +100,10 @@ namespace TopViewDefense.Turrets
         {
             _cooldown -= Time.deltaTime;
             if (_cooldown > 0f) return;
-            _cooldown = Data.fireInterval;
+            _cooldown = _fireInterval;
 
             if (PlayerEconomy.Instance != null)
-                PlayerEconomy.Instance.Add(Data.energyPerCycle);
+                PlayerEconomy.Instance.Add(_energyPerCycle);
         }
 
         // 기존 타겟이 죽거나 사거리를 벗어나면 버리고, 없으면 최근접 적을 새로 얻는다.
@@ -137,7 +148,7 @@ namespace TopViewDefense.Turrets
             for (int i = 0; i < shots; i++)
             {
                 if (_target == null || _target.IsDead) break;
-                _target.TakeDamage(Data.damage, Data.damageType);
+                _target.TakeDamage(_damage, Data.damageType);
             }
         }
 
@@ -156,7 +167,7 @@ namespace TopViewDefense.Turrets
                 if (e == null || e.IsDead) continue;
                 if ((e.Position - center).sqrMagnitude > r2) continue;
 
-                if (Data.damage > 0f) e.TakeDamage(Data.damage, Data.damageType);
+                if (Data.damage > 0f) e.TakeDamage(_damage, Data.damageType);
                 if (Data.slowMultiplier < 1f) e.ApplySlow(Data.slowMultiplier, Data.effectDuration);
                 if (Data.dotPerSecond > 0f) e.ApplyDoT(Data.dotPerSecond, Data.effectDuration, Data.damageType);
             }

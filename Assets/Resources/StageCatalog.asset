@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd82ab4616275b949a477fad6b9a5d78, type: 3}
+  m_Name: StageCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Progression.StageCatalog
+  stages:
+  - {fileID: 11400000, guid: a1df4f231b8890044aee31c53d57398d, type: 2}
+  - {fileID: 11400000, guid: 8c6a4e4997d7dee4f9d1d002ef7da2e4, type: 2}
+  - {fileID: 11400000, guid: 7808eb00f951d754185745b7b4aeee06, type: 2}
+  goldReward: 1e0000003c00000064000000

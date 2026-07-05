@@ -53,6 +53,9 @@ namespace TopViewDefense.Map
         /// <summary>StageData로부터 씬 타일과 GridState를 (재)생성한다.</summary>
         public void Build()
         {
+            // 로드 우선순위: 인스펙터 stageData → StageSelect에서 넘긴 SelectedStage → Resources 폴백.
+            if (stageData == null)
+                stageData = StageSession.SelectedStage;
             if (stageData == null)
                 stageData = Resources.Load<StageData>(stageResourcePath);
             if (stageData == null)

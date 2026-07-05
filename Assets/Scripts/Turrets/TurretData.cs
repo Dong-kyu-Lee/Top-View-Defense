@@ -24,6 +24,9 @@ namespace TopViewDefense.Turrets
         [Tooltip("배치할 프리팹. 비우면 Resources/Prefabs/Turrets/{type} 에서 이름으로 로드.")]
         public GameObject prefab;
 
+        [Tooltip("상점/HUD 아이콘(선택). 없으면 이름만 표시.")]
+        public Sprite icon;
+
         [Header("비용 / 배치")]
         [Tooltip("배치에 드는 에너지.")]
         [Min(0)] public int cost = 50;
