@@ -56,10 +56,26 @@ namespace TopViewDefense.Enemies
         /// <summary>현재 진행 중인 웨이브 인덱스(시작 전 -1).</summary>
         public int CurrentWave { get; private set; } = -1;
 
+        /// <summary>총 웨이브 수(WaveData 기준). 데이터 확정 전에는 0.</summary>
+        public int TotalWaves { get; private set; }
+
+        /// <summary>정비 카운트다운이 향하는 웨이브 인덱스(정비 중에만 유효, 그 외 -1).</summary>
+        public int PendingWave { get; private set; } = -1;
+
+        /// <summary>정비(다음 웨이브 시작 전 카운트다운) 진행 중 여부. HUD가 카운트다운/즉시시작 노출 게이트로 사용.</summary>
+        public bool IsResting { get; private set; }
+
+        /// <summary>정비 카운트다운 남은 시간(초).</summary>
+        public float RestRemaining { get; private set; }
+
+        /// <summary>정비 카운트다운 전체 시간(초). 게이지 비율(RestRemaining/RestDuration) 계산용.</summary>
+        public float RestDuration { get; private set; }
+
         private GridState Grid => mapBuilder != null ? mapBuilder.Grid : null;
 
         private Coroutine _loop;
         private int _activeGroups;             // 현재 웨이브에서 스폰 진행 중인 그룹 수
+        private bool _skipRequested;           // 즉시시작(SkipRest) 요청 — 정비 카운트다운을 조기 종료
         private Vector2Int[] _cornerCells;     // [BL, BR, TL, TR]
         private EnemyData _runtimeDefault;     // SpawnGroup.enemy 미지정 시 사용
 
@@ -97,6 +113,17 @@ namespace TopViewDefense.Enemies
             StopAllCoroutines();
             _loop = null;
             _activeGroups = 0;
+            IsResting = false;
+            RestRemaining = 0f;
+            PendingWave = -1;
+            _skipRequested = false;
+        }
+
+        /// <summary>정비 카운트다운을 즉시 종료하고 다음 웨이브를 바로 시작한다(즉시시작 버튼).
+        /// 정비 중이 아니면 무시된다.</summary>
+        public void SkipRest()
+        {
+            if (IsResting) _skipRequested = true;
         }
 
         private IEnumerator RunWaves()
@@ -117,6 +144,7 @@ namespace TopViewDefense.Enemies
                 yield break;
             }
 
+            TotalWaves = data.Count;
             _cornerCells = ResolveCornerCells();
 
             for (int i = 0; i < data.waves.Count; i++)
@@ -124,10 +152,28 @@ namespace TopViewDefense.Enemies
                 Wave wave = data.waves[i];
                 if (wave == null) continue;
 
-                // 1) 정비 시간(다음 웨이브 시작 전 대기).
+                // 1) 정비 시간(다음 웨이브 시작 전 카운트다운). 남은 시간을 노출하고 SkipRest로 조기 종료 가능.
                 OnWavePreview?.Invoke(i);
                 if (wave.restBefore > 0f)
-                    yield return new WaitForSeconds(wave.restBefore);
+                {
+                    _skipRequested = false;
+                    PendingWave = i;
+                    RestDuration = wave.restBefore;
+                    RestRemaining = wave.restBefore;
+                    IsResting = true;
+
+                    // Time.deltaTime 감산 → timeScale=0(일시정지) 시 카운트다운도 함께 멈춘다(EnergyDripper와 동일 원리).
+                    while (RestRemaining > 0f && !_skipRequested)
+                    {
+                        yield return null;
+                        RestRemaining -= Time.deltaTime;
+                    }
+
+                    IsResting = false;
+                    RestRemaining = 0f;
+                    PendingWave = -1;
+                    _skipRequested = false;
+                }
 
                 // 2) 웨이브 시작 통지(회전 스케줄러가 이 시점에 회전/경고를 발동).
                 CurrentWave = i;

@@ -37,6 +37,16 @@ namespace TopViewDefense.Enemies
         /// <summary>남은 보호막 충전 수. 1 이상이면 다음 피격 1회를 완전히 무시한다.</summary>
         public int ShieldCharges { get; private set; }
 
+        // 프리즈 감속 상태(외부에서 부여받는 피동 상태 — AddShield와 같은 계층).
+        private float _slowMultiplier = 1f; // 1 = 감속 없음.
+        private float _slowUntil;           // Time.time 기준 만료 시각.
+
+        // 파이어 도트 상태.
+        private float _dotPerSecond;
+        private float _dotUntil;            // Time.time 기준 만료 시각.
+        private float _dotTickTimer;        // 다음 초당 틱까지 남은 시간.
+        private DamageType _dotType = DamageType.Fire;
+
         private GridState _grid;
         private Pathfinder _pathfinder;
         private Vector2Int _baseCell;
@@ -54,6 +64,10 @@ namespace TopViewDefense.Enemies
             _baseCell = grid.BaseCell;
             CurrentHp = data != null ? data.maxHp : 1f;
             ShieldCharges = 0;
+            _slowMultiplier = 1f;
+            _slowUntil = 0f;
+            _dotPerSecond = 0f;
+            _dotUntil = 0f;
             IsDead = false;
             _finished = false;
 
@@ -77,10 +91,36 @@ namespace TopViewDefense.Enemies
             ShieldCharges = Mathf.Max(ShieldCharges, charges);
         }
 
+        /// <summary>
+        /// 이동 속도 감속을 부여한다(프리즈 터렛). 더 강한 감속(작은 배수)을 채택하고 지속 시간을 갱신한다.
+        /// 상태는 적이 소유해 스스로 만료 처리하므로(<see cref="Update"/>), 터렛은 한 번 스탬프만 찍는다.
+        /// </summary>
+        public void ApplySlow(float multiplier, float duration)
+        {
+            if (IsDead || _finished || multiplier >= 1f || duration <= 0f) return;
+            _slowMultiplier = Mathf.Min(_slowMultiplier, Mathf.Max(0f, multiplier));
+            _slowUntil = Mathf.Max(_slowUntil, Time.time + duration);
+        }
+
+        /// <summary>
+        /// 초당 지속 피해(도트)를 부여한다(파이어 터렛). 더 강한 도트를 채택하고 지속 시간을 갱신한다.
+        /// 도트 틱은 <b>방어력을 무시</b>하되 속성 내성(공병의 화염 내성 등)은 적용된다(<see cref="Update"/>).
+        /// </summary>
+        public void ApplyDoT(float dps, float duration, DamageType type = DamageType.Fire)
+        {
+            if (IsDead || _finished || dps <= 0f || duration <= 0f) return;
+            _dotPerSecond = Mathf.Max(_dotPerSecond, dps);
+            _dotUntil = Mathf.Max(_dotUntil, Time.time + duration);
+            _dotType = type;
+        }
+
         private void Update()
         {
             if (!_initialized || _finished) return;
             if (_grid == null || _pathfinder == null) return;
+
+            TickDoT();
+            if (_finished) return; // 도트로 사망했으면 이동 처리 중단.
 
             Vector3 pos = transform.position;
             Vector2Int cell = _grid.WorldToGrid(pos);
@@ -99,10 +139,23 @@ namespace TopViewDefense.Enemies
             Vector3 target = _grid.GridToWorld(next);
             target.y = pos.y; // 수평 이동만.
 
-            float worldSpeed = Data.moveSpeed * _grid.CellSize;
+            float slow = Time.time < _slowUntil ? _slowMultiplier : 1f;
+            float worldSpeed = Data.moveSpeed * _grid.CellSize * slow;
             transform.position = Vector3.MoveTowards(pos, target, worldSpeed * Time.deltaTime);
 
             FaceTowards(target - pos);
+        }
+
+        // 도트 상태가 살아 있으면 1초 주기로 피해를 준다. 방어력은 무시하고 속성 내성만 적용.
+        private void TickDoT()
+        {
+            if (_dotPerSecond <= 0f || Time.time >= _dotUntil) return;
+
+            _dotTickTimer -= Time.deltaTime;
+            if (_dotTickTimer > 0f) return;
+            _dotTickTimer = 1f;
+
+            ApplyDamage(_dotPerSecond, _dotType, ignoreArmor: true, ignoreShield: true);
         }
 
         private void FaceTowards(Vector3 dir)
@@ -116,19 +169,23 @@ namespace TopViewDefense.Enemies
         // ---------------------------------------------------------------- 피격/사망
 
         public void TakeDamage(float amount, DamageType type = DamageType.Physical)
+            => ApplyDamage(amount, type, ignoreArmor: false, ignoreShield: false);
+
+        // 피격 처리의 단일 경로. 도트 틱은 방어력/보호막을 무시(ignore*=true)하되 속성 내성은 공유한다.
+        private void ApplyDamage(float amount, DamageType type, bool ignoreArmor, bool ignoreShield)
         {
             if (IsDead || _finished) return;
 
             // 1) 보호막: 남아 있으면 이번 피격 1회를 완전히 무시하고 충전 1 소모.
-            if (ShieldCharges > 0)
+            if (!ignoreShield && ShieldCharges > 0)
             {
                 ShieldCharges--;
                 return;
             }
 
-            // 2) 방어력 정액 감소(최소 1 보장해 무한 탱킹 방지).
-            float armor = Data != null ? Data.armor : 0f;
-            float dealt = Mathf.Max(1f, amount - armor);
+            // 2) 방어력 정액 감소(최소 1 보장해 무한 탱킹 방지). 도트는 방어력을 무시한다.
+            float armor = (ignoreArmor || Data == null) ? 0f : Data.armor;
+            float dealt = ignoreArmor ? amount : Mathf.Max(1f, amount - armor);
 
             // 3) 속성 내성: 해당 속성이면 배수를 곱한다(0=완전 면역까지 허용).
             if (Data != null && Data.hasResistance && type == Data.resistantType)

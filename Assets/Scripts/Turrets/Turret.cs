@@ -1,4 +1,5 @@
 using TopViewDefense.Combat;
+using TopViewDefense.Core;
 using TopViewDefense.Enemies;
 using UnityEngine;
 
@@ -15,8 +16,9 @@ namespace TopViewDefense.Turrets
     /// 타일 오브젝트를 피벗 아래로 모아 돌릴 때 자식 터렛의 <b>위치·바라보는 방향이 함께 실려</b> 자동
     /// 동반 회전한다(CLAUDE.md 3장). → 터렛 쪽에 회전 대응 코드가 필요 없다(적과 같은 이점).
     ///
-    /// 1차: 히트스캔(명중 즉시 <see cref="IDamageable.TakeDamage"/>). 투사체 연출과 광역/감속/도트/에너지
-    /// 생산은 이후 페이즈에서 확장한다.
+    /// 발사는 히트스캔(명중 즉시 <see cref="IDamageable.TakeDamage"/>). 종류별 페이로드는 데이터로 가른다:
+    /// 단일 타격(기본/더블=shotsPerFire), 광역 피해·감속·도트(프리즈/파이어=areaRadius·slowMultiplier·
+    /// dotPerSecond), 공격 없이 에너지 생산(에너지=energyPerCycle). 투사체 연출은 이후 페이즈에서 확장한다.
     /// </summary>
     [DisallowMultipleComponent]
     public class Turret : MonoBehaviour
@@ -32,15 +34,24 @@ namespace TopViewDefense.Turrets
         public Vector3 Position => transform.position;
 
         private float _worldRange;
+        private float _cellSize;
         private float _cooldown;
         private Enemy _target;
         private bool _initialized;
+
+        // 생산형(에너지): 타겟 없이 주기마다 에너지를 생산한다.
+        private bool IsProducer => Data != null && Data.energyPerCycle > 0;
+
+        // 공격/효과형: 피해·감속·도트 중 하나라도 실으면 조준·발사 대상.
+        private bool HasPayload => Data != null &&
+            (Data.damage > 0f || Data.slowMultiplier < 1f || Data.dotPerSecond > 0f);
 
         /// <summary>배치 직후 호출. 데이터/셀/셀 크기를 주입한다.</summary>
         public void Init(TurretData data, Vector2Int cell, float cellSize)
         {
             Data = data;
             Cell = cell;
+            _cellSize = cellSize;
             _worldRange = data != null ? data.range * cellSize : 0f;
             _cooldown = 0f;
             _initialized = true;
@@ -50,8 +61,15 @@ namespace TopViewDefense.Turrets
         {
             if (!_initialized || Data == null) return;
 
-            // 공격 기능이 없는 터렛(에너지 등)은 조준/발사하지 않는다.
-            if (Data.damage <= 0f) return;
+            // 생산형(에너지)은 타겟 없이 주기마다 생산만 한다.
+            if (IsProducer)
+            {
+                TickProduction();
+                return;
+            }
+
+            // 공격/효과가 없는 터렛은 조준/발사하지 않는다.
+            if (!HasPayload) return;
 
             AcquireOrValidateTarget();
 
@@ -64,6 +82,17 @@ namespace TopViewDefense.Turrets
                 Fire();
                 _cooldown = Data.fireInterval;
             }
+        }
+
+        // 주기(fireInterval)마다 에너지를 생산해 지갑에 넣는다(공격 대신). 개수 제한은 TurretPlacer가 관리.
+        private void TickProduction()
+        {
+            _cooldown -= Time.deltaTime;
+            if (_cooldown > 0f) return;
+            _cooldown = Data.fireInterval;
+
+            if (PlayerEconomy.Instance != null)
+                PlayerEconomy.Instance.Add(Data.energyPerCycle);
         }
 
         // 기존 타겟이 죽거나 사거리를 벗어나면 버리고, 없으면 최근접 적을 새로 얻는다.
@@ -91,14 +120,45 @@ namespace TopViewDefense.Turrets
             transform.rotation = Quaternion.Slerp(transform.rotation, look, faceTurnSpeed * Time.deltaTime);
         }
 
-        // 1차: 히트스캔. shotsPerFire만큼 즉시 타격(더블 터렛 등은 데이터만으로 표현).
+        // 히트스캔 발사. 광역 터렛(프리즈/파이어)은 최근접 적 '위치'에 AoE를 터뜨리고(CLAUDE.md 5장),
+        // 단일 터렛(기본/더블)은 타겟에게 shotsPerFire만큼 즉시 타격한다.
         private void Fire()
+        {
+            if (Data.areaRadius > 0f)
+                FireArea(_target.Position);
+            else
+                FireSingle();
+        }
+
+        // 단일 타겟: shotsPerFire만큼 즉시 타격(더블 터렛 등은 데이터만으로 표현).
+        private void FireSingle()
         {
             int shots = Mathf.Max(1, Data.shotsPerFire);
             for (int i = 0; i < shots; i++)
             {
                 if (_target == null || _target.IsDead) break;
                 _target.TakeDamage(Data.damage, Data.damageType);
+            }
+        }
+
+        // 광역: center 반경 안 모든 적에게 피해/감속/도트를 데이터에 실린 만큼 적용한다.
+        private void FireArea(Vector3 center)
+        {
+            EnemyManager mgr = EnemyManager.Instance;
+            if (mgr == null) return;
+
+            float r = Data.areaRadius * _cellSize;
+            float r2 = r * r;
+            var enemies = mgr.Enemies;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                Enemy e = enemies[i];
+                if (e == null || e.IsDead) continue;
+                if ((e.Position - center).sqrMagnitude > r2) continue;
+
+                if (Data.damage > 0f) e.TakeDamage(Data.damage, Data.damageType);
+                if (Data.slowMultiplier < 1f) e.ApplySlow(Data.slowMultiplier, Data.effectDuration);
+                if (Data.dotPerSecond > 0f) e.ApplyDoT(Data.dotPerSecond, Data.effectDuration, Data.damageType);
             }
         }
     }

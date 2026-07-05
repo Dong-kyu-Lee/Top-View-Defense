@@ -23,8 +23,11 @@ namespace TopViewDefense.Turrets
         [Tooltip("에너지 잔량 텍스트(RemainEnergy).")]
         [SerializeField] private TMP_Text energyText;
 
-        [Tooltip("철거(판매) 버튼(선택). 이후 페이즈에서 철거 모드로 연결.")]
+        [Tooltip("철거(판매) 버튼(선택). 클릭 시 철거 모드를 토글한다.")]
         [SerializeField] private Button destroyButton;
+
+        [Tooltip("철거 모드 중 켜질 하이라이트 오브젝트(선택). 배치 버튼의 armedIndicator와 동일 방식.")]
+        [SerializeField] private GameObject destroyArmedIndicator;
 
         [Header("버튼")]
         [Tooltip("터렛 선택 버튼들. 비우면 자식에서 자동 수집.")]
@@ -42,6 +45,10 @@ namespace TopViewDefense.Turrets
                 if (b != null) b.Bind(this);
 
             if (destroyButton != null) destroyButton.onClick.AddListener(OnDestroyClicked);
+            if (destroyArmedIndicator != null) destroyArmedIndicator.SetActive(false);
+
+            // 모드(배치/철거) 변경 → 선택 하이라이트 일관 갱신(철거 성공 후 자동 해제·ESC 취소 포함).
+            if (placer != null) placer.OnModeChanged += RefreshMode;
         }
 
         // PlayerEconomy.Instance는 서로의 Awake 순서에 따라 아직 null일 수 있으므로 Start에서 구독한다
@@ -57,23 +64,24 @@ namespace TopViewDefense.Turrets
         {
             if (_economy != null) _economy.OnEnergyChanged -= HandleEnergyChanged;
             if (destroyButton != null) destroyButton.onClick.RemoveListener(OnDestroyClicked);
+            if (placer != null) placer.OnModeChanged -= RefreshMode;
         }
 
         /// <summary>버튼이 호출: 선택 토글 후 상태 갱신.</summary>
         public void OnButtonClicked(TurretButton button)
         {
             if (placer == null || button == null) return;
-            placer.Arm(button.Data);   // 같은 버튼 재클릭 = 토글 해제(TurretPlacer.Arm)
-            RefreshButtons();
+            placer.Arm(button.Data);   // 같은 버튼 재클릭 = 토글 해제(TurretPlacer.Arm) → OnModeChanged → RefreshMode
         }
 
         private void HandleEnergyChanged(int energy)
         {
             if (energyText != null) energyText.text = energy.ToString();
-            RefreshButtons();  // 잔량 변동 → 여유(interactable) 재평가
+            RefreshMode();  // 잔량 변동 → 여유(interactable) 재평가
         }
 
-        private void RefreshButtons()
+        // 배치 버튼 상태(여유/선택) + 철거 버튼 하이라이트를 한 곳에서 일관 갱신.
+        private void RefreshMode()
         {
             PlayerEconomy eco = PlayerEconomy.Instance;
             for (int i = 0; i < buttons.Count; i++)
@@ -84,12 +92,15 @@ namespace TopViewDefense.Turrets
                 bool armed = placer != null && placer.Armed == b.Data;
                 b.SetState(affordable, armed);
             }
+
+            if (destroyArmedIndicator != null)
+                destroyArmedIndicator.SetActive(placer != null && placer.Demolishing);
         }
 
-        // 철거 모드 토글은 이후 페이즈(CLAUDE.md 6장: 소모 에너지 50% 환급). 지금은 훅만 둔다.
+        // 철거 모드 토글(CLAUDE.md 6장: 소모 에너지 50% 환급). 실제 철거는 맵 클릭으로 TurretPlacer가 처리.
         private void OnDestroyClicked()
         {
-            Debug.Log("[TurretHudUI] 철거 버튼 클릭 — 철거 모드는 이후 페이즈에서 구현.");
+            if (placer != null) placer.ArmDemolish();   // → OnModeChanged → RefreshMode
         }
     }
 }

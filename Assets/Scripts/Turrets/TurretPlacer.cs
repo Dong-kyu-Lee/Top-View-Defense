@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TopViewDefense.Core;
 using TopViewDefense.Map;
@@ -41,6 +42,12 @@ namespace TopViewDefense.Turrets
         /// <summary>현재 선택된(배치 대기) 터렛. null이면 배치 모드가 아니다.</summary>
         public TurretData Armed { get; private set; }
 
+        /// <summary>철거(판매) 모드 여부. 배치 모드(<see cref="Armed"/>)와 상호 배타적이다.</summary>
+        public bool Demolishing { get; private set; }
+
+        /// <summary>모드(배치/철거) 변경 시 발행. HUD가 구독해 버튼 하이라이트를 갱신한다.</summary>
+        public event Action OnModeChanged;
+
         /// <summary>배치된 터렛 목록(개수 제한/이후 철거에서 사용).</summary>
         public IReadOnlyList<Turret> Turrets => _turrets;
 
@@ -53,20 +60,38 @@ namespace TopViewDefense.Turrets
             if (cam == null) cam = Camera.main;
         }
 
-        /// <summary>UI 버튼이 호출: 이 터렛을 배치 대기 상태로. 같은 것을 다시 누르면 해제(토글).</summary>
-        public void Arm(TurretData data) => Armed = (Armed == data) ? null : data;
+        /// <summary>UI 버튼이 호출: 이 터렛을 배치 대기 상태로. 같은 것을 다시 누르면 해제(토글). 철거 모드는 해제된다.</summary>
+        public void Arm(TurretData data)
+        {
+            Armed = (Armed == data) ? null : data;
+            Demolishing = false;
+            OnModeChanged?.Invoke();
+        }
 
-        /// <summary>배치 대기 해제.</summary>
-        public void Disarm() => Armed = null;
+        /// <summary>배치·철거 모드 모두 해제(취소).</summary>
+        public void Disarm()
+        {
+            Armed = null;
+            Demolishing = false;
+            OnModeChanged?.Invoke();
+        }
+
+        /// <summary>철거 버튼이 호출: 철거 모드를 토글한다. 켜면 배치 대기는 해제된다(상호 배타).</summary>
+        public void ArmDemolish()
+        {
+            Demolishing = !Demolishing;
+            Armed = null;
+            OnModeChanged?.Invoke();
+        }
 
         private void Update()
         {
-            if (Armed == null) return;
+            if (Armed == null && !Demolishing) return;
 
             Mouse mouse = Mouse.current;
             Keyboard keyboard = Keyboard.current;
 
-            // 우클릭/ESC = 배치 취소.
+            // 우클릭/ESC = 배치/철거 취소.
             bool cancel = (mouse != null && mouse.rightButton.wasPressedThisFrame)
                        || (keyboard != null && keyboard.escapeKey.wasPressedThisFrame);
             if (cancel)
@@ -81,7 +106,9 @@ namespace TopViewDefense.Turrets
                 if (pointer.y < bottomUiMargin) return;                          // 하단 HUD 영역
                 if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                     return;                                                        // uGUI 위 클릭(이후 정식 UI 대비)
-                TryPlaceAtPointer(pointer);
+
+                if (Armed != null) TryPlaceAtPointer(pointer);
+                else TryDemolishAtPointer(pointer);
             }
         }
 
@@ -90,6 +117,13 @@ namespace TopViewDefense.Turrets
             if (Grid == null || cam == null) return;
             if (!ScreenToCell(pointer, out Vector2Int cell)) return;
             TryPlace(Armed, cell);
+        }
+
+        private void TryDemolishAtPointer(Vector2 pointer)
+        {
+            if (Grid == null || cam == null) return;
+            if (!ScreenToCell(pointer, out Vector2Int cell)) return;
+            TryDemolish(cell);
         }
 
         /// <summary>
@@ -133,12 +167,15 @@ namespace TopViewDefense.Turrets
             return true;
         }
 
-        /// <summary>셀의 타일 오브젝트에 이미 터렛이 붙어 있는지(회전 후에도 정합).</summary>
-        public bool IsOccupied(Vector2Int cell)
+        /// <summary>셀의 타일 오브젝트에 붙은 터렛(없으면 null). 회전 후에도 셀↔오브젝트 매핑으로 정합.</summary>
+        public Turret TurretAt(Vector2Int cell)
         {
             GameObject tileObj = Grid != null ? Grid.GetObject(cell) : null;
-            return tileObj != null && tileObj.GetComponentInChildren<Turret>() != null;
+            return tileObj != null ? tileObj.GetComponentInChildren<Turret>() : null;
         }
+
+        /// <summary>셀의 타일 오브젝트에 이미 터렛이 붙어 있는지(회전 후에도 정합).</summary>
+        public bool IsOccupied(Vector2Int cell) => TurretAt(cell) != null;
 
         private int CountOfType(TurretType type)
         {
@@ -192,6 +229,27 @@ namespace TopViewDefense.Turrets
             if (turret == null) turret = go.AddComponent<Turret>();
             turret.Init(data, cell, grid.CellSize);
             _turrets.Add(turret);
+            return true;
+        }
+
+        /// <summary>
+        /// 해당 칸의 터렛을 철거한다(소모 에너지 50% 반올림 환급 → 제거). 성공 시 true, 그리고 철거 모드를 끈다
+        /// (CLAUDE.md 6장: 버튼당 한 개만 철거). 터렛이 없으면 false, 모드는 유지(재시도 가능).
+        /// 배치(<see cref="TryPlace"/>)와 대칭인 단일 철거 경로 — 입력과 테스트가 공유한다.
+        /// </summary>
+        public bool TryDemolish(Vector2Int cell)
+        {
+            Turret turret = TurretAt(cell);
+            if (turret == null) return false;
+
+            if (turret.Data != null && PlayerEconomy.Instance != null)
+                PlayerEconomy.Instance.Add(Mathf.RoundToInt(turret.Data.cost * 0.5f));
+
+            _turrets.Remove(turret);
+            Destroy(turret.gameObject); // 정규화 래퍼 루트(= 타일의 자식)만 제거 — 타일은 유지.
+
+            Demolishing = false;        // 한 개 철거 후 모드 종료: 다음 철거는 버튼 재클릭.
+            OnModeChanged?.Invoke();
             return true;
         }
 

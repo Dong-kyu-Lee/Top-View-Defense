@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "\uB3CC\uACA9\uBCD1"
   prefab: {fileID: 999613238093725486, guid: f0060b524fe61f941a6da3a040d3804f, type: 3}
   maxHp: 100
-  moveSpeed: 2
+  moveSpeed: 1
   armor: 0
   hasResistance: 0
   resistantType: 1

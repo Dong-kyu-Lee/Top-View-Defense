@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: Stage01_Waves
   m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Enemies.WaveData
   waves:
-  - label: "Wave 0 - 돌격병 (BL) [회전]"
-    restBefore: 1.5
+  - label: "Wave 0 - \uB3CC\uACA9\uBCD1 (BL) [\uD68C\uC804]"
+    restBefore: 30
     groups:
     - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
       corner: 0
       count: 4
       interval: 0.6
       startDelay: 0
-  - label: "Wave 1 - 협공 + 정찰병 (TR/BL) [회전]"
-    restBefore: 3
+  - label: "Wave 1 - \uD611\uACF5 + \uC815\uCC30\uBCD1 (TR/BL) [\uD68C\uC804]"
+    restBefore: 30
     groups:
     - enemy: {fileID: 11400000, guid: 31f1a8e67e0956845b34d4ae33fd23f6, type: 2}
       corner: 3
@@ -34,8 +34,8 @@ MonoBehaviour:
       count: 2
       interval: 0.5
       startDelay: 2
-  - label: "Wave 2 - 장갑병 등장"
-    restBefore: 4
+  - label: "Wave 2 - \uC7A5\uAC11\uBCD1 \uB4F1\uC7A5"
+    restBefore: 30
     groups:
     - enemy: {fileID: 11400000, guid: 6cccc1ee4ace3314aaf1df2788efaef1, type: 2}
       corner: 0
@@ -47,8 +47,8 @@ MonoBehaviour:
       count: 4
       interval: 0.5
       startDelay: 1
-  - label: "Wave 3 - 정찰병 러시"
-    restBefore: 4
+  - label: "Wave 3 - \uC815\uCC30\uBCD1 \uB7EC\uC2DC"
+    restBefore: 30
     groups:
     - enemy: {fileID: 11400000, guid: f639f7436f8169a48812e81760a569a1, type: 2}
       corner: 2
@@ -65,8 +65,8 @@ MonoBehaviour:
       count: 3
       interval: 0.6
       startDelay: 0.5
-  - label: "Wave 4 - 공병 호위 (피날레)"
-    restBefore: 5
+  - label: "Wave 4 - \uACF5\uBCD1 \uD638\uC704 (\uD53C\uB0A0\uB808)"
+    restBefore: 30
     groups:
     - enemy: {fileID: 11400000, guid: 2d47a181fcefd6448b9828e9072dcb1b, type: 2}
       corner: 0

@@ -16,11 +16,11 @@ MonoBehaviour:
   displayName: "\uACF5\uBCD1"
   prefab: {fileID: 5726219807846465823, guid: e89cdc804089a8942878ed7d367c7e8d, type: 3}
   maxHp: 120
-  moveSpeed: 1.6
+  moveSpeed: 1
   armor: 2
   hasResistance: 1
   resistantType: 1
-  resistanceMultiplier: 0.5
+  resistanceMultiplier: 0.3
   damageToBase: 1
   energyDrop: 10
   goldDrop: 2
