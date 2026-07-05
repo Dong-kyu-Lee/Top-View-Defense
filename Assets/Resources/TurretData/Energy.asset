@@ -19,8 +19,8 @@ MonoBehaviour:
   cost: 50
   maxCount: 3
   range: 5
-  fireInterval: 1
-  damage: 20
+  fireInterval: 10
+  damage: 0
   damageType: 3
   shotsPerFire: 1
   areaRadius: 0
@@ -33,3 +33,4 @@ MonoBehaviour:
   impactPrefab: {fileID: 0}
   projectileSpeed: 12
   muzzleLocalOffset: {x: 0, y: 0.5, z: 0.4}
+  fireSfx: {fileID: 0}
