@@ -81,5 +81,8 @@ namespace TopViewDefense.Turrets
 
         [Tooltip("총구 위치의 터렛 로컬 오프셋(탄체/플래시 스폰 지점). 모델 포신 높이/앞쪽에 맞춘다.")]
         public Vector3 muzzleLocalOffset = new Vector3(0f, 0.5f, 0.4f);
+
+        [Tooltip("발사 순간 재생할 사운드(선택). AudioManager의 SFX 그룹으로 2D 원샷 재생된다.")]
+        public AudioClip fireSfx;
     }
 }

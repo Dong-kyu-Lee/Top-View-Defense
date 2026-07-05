@@ -1,4 +1,5 @@
 using TMPro;
+using TopViewDefense.Core.Audio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -63,6 +64,11 @@ namespace TopViewDefense.Core
         private void HandleGameEnded(GameResult result, int stars)
         {
             SetPanelActive(true);
+
+            // 결과음(오디오는 timeScale=0 영향을 받지 않아 종료 직후에도 재생된다).
+            if (result == GameResult.Cleared) AudioManager.PlayGameClear();
+            else                              AudioManager.PlayGameOver();
+
             if (titleText != null)
                 titleText.text = result == GameResult.Cleared ? clearTitle : gameOverTitle;
 

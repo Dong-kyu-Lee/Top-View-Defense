@@ -1,5 +1,6 @@
 using TopViewDefense.Combat;
 using TopViewDefense.Core;
+using TopViewDefense.Core.Audio;
 using TopViewDefense.Enemies;
 using UnityEngine;
 
@@ -196,6 +197,8 @@ namespace TopViewDefense.Turrets
         private void SpawnFireVfx(Vector3 destination, Transform targetTf, int count)
         {
             Vector3 muzzle = MuzzlePoint();
+
+            AudioManager.PlaySfx(Data.fireSfx); // 발사음(2D 원샷). 다연장이라도 발사당 1회.
 
             if (Data.muzzlePrefab != null)
                 VfxPool.PlayOneShot(Data.muzzlePrefab, muzzle, transform.rotation);

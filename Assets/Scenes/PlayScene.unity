@@ -2522,6 +2522,7 @@ GameObject:
   - component: {fileID: 332937817}
   - component: {fileID: 332937816}
   - component: {fileID: 332937818}
+  - component: {fileID: 332937819}
   m_Layer: 0
   m_Name: EnemyManager
   m_TagString: Untagged
@@ -2574,6 +2575,21 @@ MonoBehaviour:
   fallbackPrefab: {fileID: 0}
   spawnYOffset: 1.3
   autoBegin: 1
+--- !u!114 &332937819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332937814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a64ace9d3b7f2034289adef02ae7787b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Core.EnemyRewardDropper
+  enemyManager: {fileID: 332937816}
+  economy: {fileID: 1298887375}
+  gameManager: {fileID: 2071137470}
 --- !u!1 &344078250
 GameObject:
   m_ObjectHideFlags: 0
@@ -2713,6 +2729,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 344078250}
   m_CullTransparentMesh: 1
+--- !u!1 &362129675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 362129676}
+  - component: {fileID: 362129677}
+  m_Layer: 0
+  m_Name: SceneBgm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &362129676
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 362129675}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &362129677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 362129675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef91741c298c1984b91ea84e384fbb73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Core.Audio.SceneBgm
+  track: {fileID: 8300000, guid: 827c59504890e864e91096533a863f42, type: 3}
 --- !u!1 &382298234
 GameObject:
   m_ObjectHideFlags: 0
@@ -2778,7 +2839,7 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -11713,6 +11774,8 @@ MonoBehaviour:
   cellSize: 1
   centerOnTransform: 1
   tilePrefabFolder: Prefabs/Tiles
+  basePrefab: {fileID: 5328040224370977362, guid: 8c7125492b05e3748b8f5eff5a2b5daf, type: 3}
+  baseResourcePath: Prefabs/Base
 --- !u!4 &1803838265
 Transform:
   m_ObjectHideFlags: 0
@@ -11879,6 +11942,7 @@ GameObject:
   - component: {fileID: 1823220391}
   - component: {fileID: 1823220390}
   - component: {fileID: 1823220389}
+  - component: {fileID: 1823220393}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -11975,6 +12039,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1823220393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823220388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb278be18b8c227449f5f58174de4291, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TopViewDefense.Core.Audio.UiClickSfx
 --- !u!1 &1831974531
 GameObject:
   m_ObjectHideFlags: 0
@@ -15210,3 +15286,4 @@ SceneRoots:
   - {fileID: 2071137471}
   - {fileID: 720569839}
   - {fileID: 738631047}
+  - {fileID: 362129676}

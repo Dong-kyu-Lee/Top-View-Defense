@@ -53,7 +53,8 @@ Assets/Scripts/
 │   ├── WaveData.cs        # 웨이브 편성 SO (Wave / SpawnGroup / SpawnCorner)
 │   └── WaveRunner.cs      # WaveData 재생: 모서리별 웨이브 스폰 + 웨이브 이벤트 발행 (MonoBehaviour)
 └── Core/
-    └── BaseCore.cs        # 기지 목숨·승패·별점 (MonoBehaviour)
+    ├── BaseCore.cs           # 기지 목숨·승패·별점 (MonoBehaviour)
+    └── EnemyRewardDropper.cs # 처치 보상: 에너지 즉시 지급 + 골드 세션 누적→클리어 뱅킹 (MonoBehaviour)
 ```
 
 ---
@@ -225,7 +226,7 @@ StageData → MapBuilder ─→ GridState + Pathfinder(흐름장)
    EnemyManager ◀──이벤트(OnReachedBase / OnDied)──┘
         │
         ├─ OnEnemyReachedBase ─→ BaseCore : 목숨 감소 → (0) OnGameOver
-        ├─ OnEnemyKilled       ─→ (경제 시스템: 보상 드랍) [미구현]
+        ├─ OnEnemyKilled       ─→ EnemyRewardDropper : 에너지 즉시 지급 + 골드 세션 누적(클리어 시 뱅킹)
         └─ FindNearest         ─→ Turret 타게팅 (Turret-Architecture.md §4.3)
 ```
 
@@ -263,12 +264,17 @@ StageData → MapBuilder ─→ GridState + Pathfinder(흐름장)
       `RotationScheduler`가 `WaveRunner.OnWaveStarted`를 구독해 발동(경고는 `warningWavesBefore` 웨이브 전).
       ⚠️ 이관: 기존 스테이지의 회전 이벤트는 `triggerWave`를 재입력해야 함(필드 변경으로 옛 값 리셋).
 
+**완료 (속성 처리 + 경제 연동):**
+
+- [x] **속성 처리 확장**: 도트(DoT) 지속 피해 파이프라인(파이어 터렛), 프리즈 감속.
+      `Enemy.ApplySlow`/`ApplyDoT`/`TickDoT`(방어력 무시·속성 내성 적용) + 터렛 `FireArea`가 적용.
+- [x] **경제 연동**: `OnEnemyKilled` → `EnemyRewardDropper`. 에너지는 처치 즉시 `PlayerEconomy.Add`,
+      골드는 세션 누적 후 **클리어 시에만** `PlayerProgress.AddGold`로 확정(패배 시 폐기, CLAUDE.md 7장).
+
 **미착수:**
 
-- [ ] **속성 처리 확장**: 도트(DoT) 지속 피해 파이프라인(파이어 터렛), 프리즈 감속.
 - [ ] **Phase 5 — 폐쇄회로 대응**: 길이 완전히 막히면 `Pathfinder.DestructionTargets`의 Obstacle을
       적이 공격·파괴하고 통과(CLAUDE.md 3장). 현재는 막히면 대기.
-- [ ] **경제 연동**: `OnEnemyKilled` → 에너지/골드 드랍(CLAUDE.md 7장).
 - [x] **터렛 연동(1차)**: `FindNearest`로 타게팅하는 기본 터렛 배치·조준·히트스캔 구현
       ([`Turret-Architecture.md`](./Turret-Architecture.md)). 나머지 4종·투사체·경제 드랍은 그 문서 §6 참고.
 ```
